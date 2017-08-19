@@ -2,8 +2,9 @@ from pprint import pprint
 from urllib.parse import urlencode
 import requests
 import config
-import json
 
+# Авторизация
+#
 # auth_data = {
 #     'client_id': config.APP_ID,
 #     'redirect_url': 'https://oauth.vk.com/blank.html',
@@ -68,7 +69,6 @@ def output(common_friends_ids):
     }
     response = requests.get('https://api.vk.com/method/users.get', params)
     common_friends = response.json().get('response')
-    print(type(common_friends))
     print("Друзья, с которыми есть общие друзья: ")
     for person in common_friends:
             print(person["first_name"], person["last_name"])
