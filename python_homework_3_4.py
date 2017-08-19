@@ -16,7 +16,7 @@ import json
 # print('?'.join((config.URL, urlencode(auth_data))))
 
 def find_my_friends():
-    """Поиск моих друзей и формирование кортежа с идентификаторами"""
+    """Поиск моих друзей и формирование множества с идентификаторами"""
     params = {
         'user_id': config.MY_ID,
         'fields': 'first_name',
@@ -29,12 +29,11 @@ def find_my_friends():
     for person in friend_list:
         friend_ids.append(person["id"])
     set_of_my_friends = set(friend_ids)
-    print(len(set_of_my_friends))
     return set_of_my_friends
 
 
 def find_friends_of_my_friends(set_of_my_friends):
-    """Поиск друзей друзей формирование кортежа с идентификаторами"""
+    """Поиск друзей друзей формирование множества с идентификаторами"""
     friends_of_my_friends_list = []
     for user_id in set_of_my_friends:
         params = {
@@ -45,33 +44,34 @@ def find_friends_of_my_friends(set_of_my_friends):
         }
         response = requests.get('https://api.vk.com/method/friends.get', params)
         friends_of_my_friends_list.append(response.json().get('response').get('items'))
-    # print(len(friends_of_my_friends_list))
     friends_of_my_friends_ids = []
     for sublist in friends_of_my_friends_list:
         for person in sublist:
             friends_of_my_friends_ids.append(person["id"])
     set_of_friends_of_my_friends = set(friends_of_my_friends_ids)
-    # print(set_of_friends_of_my_friends)
     return set_of_friends_of_my_friends
 
 
 def intersection(set_of_my_friends, set_of_friends_of_my_friends):
+    """Поиск пересечений множеств друзей и друзей друзей"""
     common_friends_ids = set_of_my_friends & set_of_friends_of_my_friends
     return common_friends_ids
 
 
 def output(common_friends_ids):
-    common_friends = list(common_friends_ids)
-    print(common_friends)
+    """Вывод друзей, с которыми есть общие друзья"""
     params = {
-        'user_id': common_friends,
+        'user_ids': str(common_friends_ids),
         'fields': 'first_name',
         'access_token': config.TOKEN,
         'v': config.VERSION,
     }
     response = requests.get('https://api.vk.com/method/users.get', params)
-    print(response.json())
-
+    common_friends = response.json().get('response')
+    print(type(common_friends))
+    print("Друзья, с которыми есть общие друзья: ")
+    for person in common_friends:
+            print(person["first_name"], person["last_name"])
 
 if __name__ == "__main__":
     output(intersection(find_my_friends(), find_friends_of_my_friends(find_my_friends())))
